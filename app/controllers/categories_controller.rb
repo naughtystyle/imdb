@@ -1,11 +1,13 @@
 class CategoriesController < ApplicationController
   def show
-    movies = Movie.filter_by(category)
-
     render "movies/index", locals: { categories: categories, movies: movies }
   end
 
   private
+
+  def movies
+    Movie.filter_by(category).page(params[:page])
+  end
 
   def category
     params[:id]

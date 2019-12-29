@@ -10,6 +10,6 @@ class MoviesController < ApplicationController
   end
 
   def movies
-    Movie.all
+    Movie.page(params[:page])
   end
 end

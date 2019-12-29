@@ -2,7 +2,7 @@ version: 2
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: circleci/ruby:2.6.3
+    - image: circleci/ruby:2.6.3-node-browsers
       environment:
         PGHOST: 127.0.0.1
         PGUSER: dan
@@ -44,6 +44,12 @@ jobs:
           command: |
             gem install bundler:2.0.2
             bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs 4 --retry 3
+
+      - run:
+          name: Install & Compile Webpacker
+          command: |
+            bin/rails webpacker:install
+            bin/rails webpacker:compile
 
       - run:
           name: Install postgresql client

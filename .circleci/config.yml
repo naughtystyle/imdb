@@ -1,0 +1,101 @@
+version: 2
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/ruby:2.6.3
+      environment:
+        PGHOST: 127.0.0.1
+        PGUSER: dan
+        RAILS_ENV: test
+        COVERAGE: true
+    - image: circleci/postgres:9.6.2-alpine
+      environment:
+        POSTGRES_USER: dan
+        POSTGRES_DB: imdb_test
+        POSTGRES_PASSWORD: ""
+    - image: redis
+jobs:
+  build:
+    <<: *defaults
+
+    steps:
+      - run:
+          name:  Download cc-test-reporter
+          command: |
+            mkdir -p tmp/
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./tmp/cc-test-reporter
+            chmod +x ./tmp/cc-test-reporter
+      - persist_to_workspace:
+          root: tmp
+          paths:
+            - cc-test-reporter
+  backend:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/repo/tmp
+      - restore_cache:
+          keys:
+            - imdb-{{ checksum "Gemfile.lock" }}
+            - imdb-
+      - run:
+          name: Install dependencies
+          command: |
+            gem install bundler:2.0.2
+            bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs 4 --retry 3
+
+      - run:
+          name: Install postgresql client
+          command: |
+            sudo apt-get update
+            sudo apt install -y postgresql-client || true
+
+      - save_cache:
+          key: imdb-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+
+      - run:
+          name: Database Setup
+          command: |
+            bin/rails db:schema:load --trace
+      - run:
+          name: Run backend tests
+          command: |
+            bin/rspec --profile 10 \
+              --format progress \
+              $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
+            ./tmp/cc-test-reporter format-coverage -t simplecov -o tmp/codeclimate.backend.json coverage/backend/.resultset.json
+      - persist_to_workspace:
+          root: tmp
+          paths:
+            - codeclimate.backend.json
+  coverage:
+    <<: *defaults
+    environment:
+      - CC_TEST_REPORTER_ID: 1b08207f13893bf7e69cc9496d4111bfadaeb0c81bfbe20a3b2ba1a6321c5706
+    steps:
+      - attach_workspace:
+          at: ~/repo/tmp
+      - run:
+          name: Upload coverage results to Code Climate
+          command: |
+            ./tmp/cc-test-reporter sum-coverage tmp/codeclimate.*.json -p 1 -o tmp/codeclimate.total.json
+            ./tmp/cc-test-reporter upload-coverage -i tmp/codeclimate.total.json
+workflows:
+  version: 2
+
+  commit:
+    jobs:
+      - build
+      - backend:
+          requires:
+            - build
+      - coverage:
+          requires:
+             - backend

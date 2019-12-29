@@ -1,0 +1,7 @@
+<nav class="filters">
+  <ul>
+    <% filters.each do |filter| %>
+      <li class="filter"><%= link_to filter.name, filter %></li>
+    <% end %>
+  </ul>
+</nav>

@@ -1,7 +1,7 @@
 <h1>Movies</h1>
 
+<%= render "movies/filters", filters: categories %>
+
 <ul class="movies-list">
-  <% movies.each do |movie| %>
-    <li class="movie"><%= movie.title %></li>
-  <% end %>
+  <%= render movies %>
 </ul>

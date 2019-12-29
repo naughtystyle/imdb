@@ -10,8 +10,4 @@ feature "User views all movies" do
     expect(page).to have_movie("Fight Club")
     expect(page).to have_movie("Matrix")
   end
-
-  def have_movie(title)
-    have_selector(".movie", text: title)
-  end
 end

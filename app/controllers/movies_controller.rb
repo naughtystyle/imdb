@@ -1,5 +1,15 @@
 class MoviesController < ApplicationController
   def index
-    render locals: { movies: Movie.all }
+    render locals: { categories: categories, movies: movies }
+  end
+
+  private
+
+  def categories
+    Category.all
+  end
+
+  def movies
+    Movie.all
   end
 end

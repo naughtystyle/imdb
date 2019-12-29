@@ -30,6 +30,6 @@ group :test do
   gem "capybara-selenium"
   gem "chromedriver-helper"
   gem "factory_bot_rails"
-  gem "shoulda-matchers", require: false
+  gem "shoulda-matchers"
   gem "simplecov", require: false
 end

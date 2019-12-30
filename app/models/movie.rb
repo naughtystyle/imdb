@@ -5,7 +5,7 @@ class Movie < ApplicationRecord
 
   validates :title, presence: true
 
-  def average_rating
-    ratings.average(:rate)
+  def update_average_rating
+    update(average_rating: ratings.average(:rate))
   end
 end

@@ -6,7 +6,7 @@ class CategoriesController < ApplicationController
   private
 
   def movies
-    Movie.filter_by(category).page(params[:page])
+    MovieFilterQuery.new(category: category, page: params[:page]).results
   end
 
   def category

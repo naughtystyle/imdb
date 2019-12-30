@@ -5,10 +5,6 @@ class Movie < ApplicationRecord
 
   validates :title, presence: true
 
-  def self.filter_by(category)
-    joins(:category).where(categories: { name: category })
-  end
-
   def average_rating
     ratings.average(:rate)
   end

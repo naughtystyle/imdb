@@ -8,4 +8,9 @@ FactoryBot.define do
   factory :category do
     sequence(:name) {|n| "Category name #{n}" }
   end
+
+  factory :user do
+    sequence(:email) { |n| "user#{n}@email.com" }
+    password { "password" }
+  end
 end

@@ -1,1 +1,6 @@
 <li class="movie"><%= movie.title %></li>
+
+<%= form_with model: [movie, Rating.new], class: "form-rate" do |f| %>
+  <%= f.select :rate, options_for_select(1..10) %>
+  <%= f.submit "Save" %>
+<% end %>

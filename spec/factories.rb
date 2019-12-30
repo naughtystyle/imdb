@@ -13,4 +13,10 @@ FactoryBot.define do
     sequence(:email) { |n| "user#{n}@email.com" }
     password { "password" }
   end
+
+  factory :rating do
+    movie
+    user
+    rate { 10 }
+  end
 end
